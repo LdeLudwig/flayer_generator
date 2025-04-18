@@ -75,6 +75,9 @@ def get_image_embeddings(pair_list):
     except Exception as e:
         raise Exception("Error in get_image_embeddings: ", e)
 
+""" 
+    TODO - Remove main function to populate docker database
+"""
 def main():
     # get the images from the database
     images = list(map(lambda el: Image.open(el), sample_image_urls))
