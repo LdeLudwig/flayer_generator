@@ -1,0 +1,23 @@
+# Created by https://www.toptal.com/developers/gitignore/api/dotenv,venv
+# Edit at https://www.toptal.com/developers/gitignore?templates=dotenv,venv
+
+### dotenv ###
+.env
+
+### venv ###
+# Virtualenv
+# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+.venv
+pip-selfcheck.json
+
+# End of https://www.toptal.com/developers/gitignore/api/dotenv,venv
+*/*/__pycache__
+flyers_data

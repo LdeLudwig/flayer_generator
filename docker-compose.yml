@@ -1,0 +1,30 @@
+version: '3.8'
+
+x-logging: 
+  &default-logging
+  driver: 'json-file'
+  options:
+    max-size: '1M'
+    max-file: '5'
+
+services:
+  db:
+    image: 'qdrant/qdrant:latest'
+    restart: always
+    ports:
+    - '6333:6333'
+    - '6334:6334'
+    environment:
+    - QDRANT__SERVICE__GRPC_PORT=6334
+    volume:
+    - ./qdrant_data: /qdrant/storage
+    network:
+    - db
+    logging: *default-logging
+
+  fastapi:
+    image: 
+    build:
+    depends_on:
+      - db
+    
