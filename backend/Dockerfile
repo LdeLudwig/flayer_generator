@@ -1,4 +1,4 @@
-FROM python:3.
+FROM python:3.10
 
 ENV PYTHONUNBUFFERED=1
 
@@ -17,5 +17,3 @@ COPY utils /app/utils
 COPY *py /app
 
 WORKDIR /app/
-
-CMD  ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

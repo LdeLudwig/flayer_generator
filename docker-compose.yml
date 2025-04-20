@@ -16,15 +16,18 @@ services:
     - '6334:6334'
     environment:
     - QDRANT__SERVICE__GRPC_PORT=6334
-    volume:
-    - ./qdrant_data: /qdrant/storage
-    network:
-    - db
     logging: *default-logging
 
   fastapi:
-    image: 
-    build:
+    build: backend
+    restart: always
     depends_on:
       - db
+    ports:
+      - 127.0.0.1:8000:8000
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    logging: *default-logging
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+     
     
