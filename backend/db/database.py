@@ -1,4 +1,4 @@
-import os
+from fastapi import status
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
@@ -40,16 +40,17 @@ async def upsert_flyer_embeddings(embedding, pair_list):
                     "filename": pair_list[idx][0].file_name,
                     "caption": pair_list[idx][1],
                     "max_length": 100,
-                    "similarity": embedding.get("similarity")  
                 }
             )
-
             points.append(point)
 
         except Exception as e:
             raise Exception("Error in upsert_embeddings: ", e)
     
-    await qdrant_client.upsert(
+    response = await qdrant_client.upsert(
             collection_name=COLLECTION_NAME,
             points=points
         )
+    if response.status != 'ok':
+        return status.HTTP_500_INTERNAL_SERVER_ERROR
+    return status.HTTP_200_OK

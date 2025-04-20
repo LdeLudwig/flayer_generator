@@ -9,7 +9,6 @@ from image_tratative import sample_image_urls
 captioning_processor = AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base", use_fast=False)
 captioning_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
 
-
 # Define the image embedding model
 clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
@@ -34,7 +33,7 @@ def generate_caption(images):
     
             pair_object.append((image, caption))
             
-        return pair_object, caption
+        return pair_object
     
     except Exception as e:
         raise Exception("Error in generate_caption: ", e)
@@ -45,8 +44,6 @@ def get_image_embeddings(pair_list):
     try:
         embed_list = []
         for image, caption in pair_list:
-
-            
             # Load process to text
             input_caption = clip_processor(text=[caption], return_tensors="pt", padding=True, truncate=True).to(device)
             input_image = clip_processor(images=image, return_tensors="pt", padding=True, truncate=True).to(device)
@@ -57,17 +54,10 @@ def get_image_embeddings(pair_list):
 
             caption_array = caption_embedding.squeeze().cpu().numpy()
             image_array = image_embedding.squeeze().cpu().numpy()
-            
-            # calculating similarity
-            combined_inputs = clip_processor(images=image, text=[caption], return_tensors="pt", padding=True, truncate=True).to(device)
-            with torch.no_grad():
-                clip_outputs = clip_model(**combined_inputs)
-                clip_similarity = float(clip_outputs.logits_per_image.softmax(dim=1).cpu().numpy()[0][0])
-                
+                            
             embed_list.append({
                 "image":image_array,
                 "caption": caption_array,
-                "similarity": clip_similarity
             })  
         
         print(embed_list[0])
@@ -83,7 +73,7 @@ def main():
     images = list(map(lambda el: Image.open(el), sample_image_urls))
     #print(images)
     # get the embeddings from the images
-    pair_list, caption = generate_caption(images)
+    pair_list= generate_caption(images)
 
     # send pairs of images and captions to the embedding model
     get_image_embeddings(pair_list)

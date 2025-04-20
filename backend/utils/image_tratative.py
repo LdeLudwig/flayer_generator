@@ -12,19 +12,16 @@ from PIL import Image
 
 # this part may be removed later to be replaced by the function to get the images uploaded by the user
 # get all images from ./flayers/train
-base_dir = "../../flyers_data/train"
-all_images = os.listdir(base_dir)
-
-# get the full path of the images
-sample_image_urls = list(map(lambda item: f"{base_dir}/{item}", all_images))
-
 
 """ Used locally to convert all the test images in jpg """
-# convert the images to jpg
-def convert_image_to_jpg(sample_images_urls):
-    for image_url in sample_images_urls:
+def formatting_train_images_to_jpg():
+    base_dir = "../../flyers_data/train"
+    all_images = os.listdir(base_dir)
+    # get the full path of the images
+    train_sample_flyers = list(map(lambda item: f"{base_dir}/{item}", all_images))
+    for image_url in train_sample_flyers:
         image = Image.open(image_url)
         rgb_image = image.convert("RGB")
         rgb_image.save(f"./flayers/train/{image_url.split('/')[-1].split('.')[0]}.jpg")
         os.remove(image_url)
-    return sample_images_urls
+    return train_sample_flyers
