@@ -1,17 +1,17 @@
 from fastapi.routing import APIRouter
-from ..db.models import Prompt
+from db.models import Prompt
 
-route = APIRouter(
+router = APIRouter(
     prefix="/api",
 )
 
-@route.get("/dalle")
+@router.post("/dalle")
 def dalle():
+
     """ TODO:
         - send prompt to dalle
         - get image from dalle
-        - save image to db
+        - save image to db (maybe after results be more accurate)
         - return image
     """
     return {"message": "Hello World"}
-

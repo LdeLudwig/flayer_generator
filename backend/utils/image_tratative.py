@@ -15,13 +15,18 @@ from PIL import Image
 
 """ Used locally to convert all the test images in jpg """
 def formatting_train_images_to_jpg():
-    base_dir = "../../flyers_data/train"
+    base_dir = "flyers_data/train"
     all_images = os.listdir(base_dir)
     # get the full path of the images
     train_sample_flyers = list(map(lambda item: f"{base_dir}/{item}", all_images))
+    
+    flyers_images = []
     for image_url in train_sample_flyers:
         image = Image.open(image_url)
-        rgb_image = image.convert("RGB")
-        rgb_image.save(f"./flayers/train/{image_url.split('/')[-1].split('.')[0]}.jpg")
-        os.remove(image_url)
-    return train_sample_flyers
+        if image_url.split('.')[-1] != 'jpg':
+            image.save(f"./flayers/train/{image_url.split('/')[-1].split('.')[0]}.jpg")
+            os.remove(image_url)
+
+        flyers_images.append(image)
+         
+    return flyers_images
