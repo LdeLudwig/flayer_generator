@@ -1,9 +1,12 @@
+import torch
 from fastapi import FastAPI, status, HTTPException 
-from api.dalle import router as dalle_router
 from fastapi.middleware.cors import CORSMiddleware
 from db.vector_database import QdrantFlyerManager
+from db.models import Prompt
+from api.image_generator import router as api_router
 from utils.image_tratative import formatting_train_images_to_jpg
-from utils.embedding import generate_caption, get_image_embeddings
+from utils.embedding import Embedding
+from utils.RAG import RAG
 
 
 app = FastAPI(title="Flayer Generator", description="Multimodal Flyer generator")
@@ -19,6 +22,13 @@ app.add_middleware(
 
 # Initialize the QdrantFlyerManager instance
 qdrant_manager = QdrantFlyerManager()
+# Initialize Embedding instance
+embedding = Embedding()
+# Initialize RAG instance
+rag = RAG()
+
+# Define the upload directory
+UPLOAD_DIR="./uploads"
 
 
 @app.get("/")
@@ -31,8 +41,8 @@ async def train_embedding(collection_name: str):
     try:
         # Format images
         train_flyers = formatting_train_images_to_jpg()
-        pair_list = generate_caption(train_flyers)
-        image_embeddings = get_image_embeddings(pair_list)
+        pair_list = embedding.generate_caption(train_flyers)
+        image_embeddings = embedding.get_train_image_embeddings(pair_list)
 
         # Initialize collection (await async call)
         collection_response = await qdrant_manager.initialize_collection(collection_name)
@@ -64,6 +74,24 @@ async def train_embedding(collection_name: str):
             detail=f"Error in train_embedding: {str(e)}"
         )
 
+@app.post("/get_rag_response", tags=["generate_flyer"])
+async def get_rag_response(prompt: Prompt):
+    try:
+        # Perform similarity search
+        response = await rag.get_similar_flyers(prompt)
+        if response:
+            return {"response": response}
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve response",
+            )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error in get_rag_response: {str(e)}"
+        )
+
 @app.get("/get_collection_info", tags=["collection"])
 async def get_collection_info(collection_name: str):
     try:
@@ -77,6 +105,5 @@ async def get_collection_info(collection_name: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error in get_collection_info: {str(e)}"
         )
-
 # include routers to use dalle llm
-app.include_router(dalle_router)
+app.include_router(api_router)

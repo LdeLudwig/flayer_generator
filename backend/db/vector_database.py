@@ -2,7 +2,7 @@ import uuid
 from typing import List, Tuple
 from fastapi import status
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import Distance, VectorParams, PointStruct, SearchParams
 
 class QdrantFlyerManager:
     IMAGE_VECTOR_SIZE = 512
@@ -12,6 +12,9 @@ class QdrantFlyerManager:
         self.qdrant_client = AsyncQdrantClient(qdrant_url)
 
     async def initialize_collection (self, collection: str) -> int:
+        """
+        Initialize a Qdrant collection for flyers.
+        """
         try:
             # Create a collection if it doesn't exist
             collections = await self.qdrant_client.get_collections()
@@ -31,7 +34,9 @@ class QdrantFlyerManager:
     async def upsert_embeddings(
         self, embeddings: List[dict], pair_list: List[Tuple], collection_name: str
     ) -> int:
-        
+        """
+        Upsert image and text embeddings to Qdrant. 
+        """
         points=[]
 
         for idx, embedding in enumerate(embeddings):
@@ -60,4 +65,25 @@ class QdrantFlyerManager:
         if response.status != 'completed':
             return status.HTTP_500_INTERNAL_SERVER_ERROR
         return status.HTTP_200_OK
+    
+    async def similarity_search(self, embedding: List[float], search: str, collection_name: str) -> list:
+        """
+        Perform similarity search in Qdrant using the prompt's embedding.
+        Selects 'text' or 'image' vector based on prompt content. 
+        """
+        try:
+            response = await self.qdrant_client.query_points(
+                collection_name=collection_name,
+                query=embedding,
+                with_vectors=True,
+                with_payload=True,
+                search_params=SearchParams(hnsw_ef=128, exact=False),
+                using=search,
+                limit=5
+            )
+            
+            return response.points
+        except Exception as e:
+            raise Exception(f"Error in similarity_search: {e}")
+
 
