@@ -23,3 +23,4 @@ pip-selfcheck.json
 __pycache__
 flyers_data
 qdrant_data
+uploads
