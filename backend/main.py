@@ -35,6 +35,20 @@ UPLOAD_DIR="./uploads"
 def read_root():
     return {"Server is running!"}
 
+@app.get("/get_collection_info", tags=["collection"])
+async def get_collection_info(collection_name: str):
+    try:
+        # Get collection info
+        collection_info = await qdrant_manager.qdrant_client.get_collection(collection_name)
+        return {
+            print(collection_info)
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error in get_collection_info: {str(e)}"
+        )
+
 
 @app.post("/train_embedding", tags=["train_embedding"])
 async def train_embedding(collection_name: str):
@@ -90,20 +104,6 @@ async def get_rag_response(prompt: Prompt):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error in get_rag_response: {str(e)}"
-        )
-
-@app.get("/get_collection_info", tags=["collection"])
-async def get_collection_info(collection_name: str):
-    try:
-        # Get collection info
-        collection_info = await qdrant_manager.qdrant_client.get_collection(collection_name)
-        return {
-            print(collection_info)
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in get_collection_info: {str(e)}"
         )
 # include routers to use dalle llm
 app.include_router(api_router)

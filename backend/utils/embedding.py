@@ -1,5 +1,4 @@
 #from kaggle import KaggleApi
-import os
 import torch
 from PIL import Image
 from transformers import CLIPProcessor, CLIPModel, BlipForConditionalGeneration, AutoProcessor
@@ -78,7 +77,7 @@ class Embedding:
         
     def input_text_embedding(self, text: str):
         try:
-            input_text = self.clip_processor(text=[text], return_tensors="pt", padding=True, max_length=100, truncation=True)
+            input_text = self.clip_processor(text=[text], return_tensors="pt", padding=True, max_length=200, truncation=True)
 
             with torch.no_grad():
                 text_embedding = self.clip_model.get_text_features(**input_text)
