@@ -8,8 +8,8 @@ from fastapi import APIRouter, HTTPException, status
 from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 from langchain.prompts import PromptTemplate
 # Local imports
-from db.models import Prompt
-from utils.RAG import RAG
+from backend.models.prompt import Prompt
+from backend.services.RAG import RAG
 
 
 router = APIRouter(prefix="/api", tags=["generate_flyer"])
@@ -64,6 +64,7 @@ async def get_rag_data(prompt: Prompt, multimodal: bool = False) -> tuple[list[s
             detail="No similar flyers found in RAG."
         )
     text_rag_embedding = [rag_response.get('text', '') for rag_response in rag_responses]
+    
     if multimodal:
         image_rag_embedding = [rag_response.get('image', '') for rag_response in rag_responses]
         return text_rag_embedding, image_rag_embedding

@@ -2,6 +2,7 @@ import os
 from PIL import Image
 
 
+
 """ 
     TODO(get_user_uploaded_images) - in case of a complex application
 
@@ -11,7 +12,7 @@ from PIL import Image
 """
 
 # this part may be removed later to be replaced by the function to get the images uploaded by the user
-# get all images from ./flayers/train
+# get all images from .data/flayers/train
 
 """ Used locally to convert all the test images in jpg """
 def formatting_train_images_to_jpg():

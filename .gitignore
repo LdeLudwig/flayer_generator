@@ -19,6 +19,11 @@ pyvenv.cfg
 pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/dotenv,venv
+
+# uv
+.uv_cache/
+
+# Project specific
 */*/__pycache__
 __pycache__
 flyers_data

@@ -1,12 +1,11 @@
-import torch
 from fastapi import FastAPI, status, HTTPException 
 from fastapi.middleware.cors import CORSMiddleware
-from db.vector_database import QdrantFlyerManager
-from db.models import Prompt
-from api.image_generator import router as api_router
-from utils.image_tratative import formatting_train_images_to_jpg
-from utils.embedding import Embedding
-from utils.RAG import RAG
+from backend.db.vector_database import QdrantFlyerManager
+from backend.models.prompt import Prompt
+from backend.api.image_generator import router as api_router
+from backend.services.image_tratative import formatting_train_images_to_jpg
+from backend.services.embedding import Embedding
+from backend.services.RAG import RAG
 
 
 app = FastAPI(title="Flayer Generator", description="Multimodal Flyer generator")

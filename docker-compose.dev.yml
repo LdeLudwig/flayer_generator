@@ -1,0 +1,40 @@
+# Development override for docker-compose
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      # Force offline mode if models are pre-cached
+      # TRANSFORMERS_OFFLINE: "1"
+
+      # Use custom model if needed
+      # CLIP_MODEL_NAME: "openai/clip-vit-base-patch32"
+
+      # Enable debug logging
+      PYTHONPATH: "/app"
+
+      # uv cache directory
+      UV_CACHE_DIR: "/opt/uv-cache"
+
+    volumes:
+      # Mount local cache directory to persist models between runs
+      - ~/.cache/huggingface:/root/.cache/huggingface
+
+      # Mount uv cache directory to persist between runs
+      - uv-cache:/opt/uv-cache
+
+      # Mount source code for development (optional)
+      # - ./backend:/app
+
+    # Add health check
+    healthcheck:
+      test: ["CMD", "uv", "run", "python", "-c", "import requests; requests.get('http://localhost:8000/docs')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  uv-cache:

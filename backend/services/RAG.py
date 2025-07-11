@@ -1,8 +1,8 @@
 from PIL import Image
 from fastapi import status, HTTPException
-from db.vector_database import QdrantFlyerManager
-from utils.embedding import Embedding
-from db.models import Prompt
+from backend.db.vector_database import QdrantFlyerManager
+from backend.services.embedding import Embedding
+from backend.models.prompt import Prompt
 
 class RAG:
     def __init__(self):
@@ -11,14 +11,42 @@ class RAG:
 
     async def get_similar_flyers(self, query: Prompt, collection_name: str = "flyers"):
         """
-        Retrieve similar flyers from Qdrant based on text, image, or both.
-        - Text-only: Use text embedding.
-        - Image-only: Use image embedding.
-        - Text+image: Average text and image embeddings.
+        Retrieve similar flyers from the vector database based on a text and/or image query.
+
+        This method performs semantic similarity search by converting the input query into embeddings
+        and finding the most similar flyers in the vector database. It supports multimodal queries
+        (text + image), text-only queries, and image-only queries.
+
+        Args:
+            query (Prompt): A Prompt object containing the search query. Must have at least one of:
+                - text (Optional[str]): Text description to search for
+                - images (Optional[List[str]]): List of image file paths (only first image is used)
+            collection_name (str, optional): Name of the Qdrant collection to search in.
+                Defaults to "flyers".
+
+        Returns:
+            List[Dict]: A list of dictionaries containing similar flyer information. Each dictionary includes:
+                - id: Unique identifier of the flyer
+                - filename: Original filename of the flyer image
+                - text: Text content associated with the flyer
+                - score: Similarity score (higher = more similar)
+                - image_vector: Image embedding vector
+                - text_vector: Text embedding vector
+
+        Raises:
+            HTTPException:
+                - 400 BAD REQUEST: If query contains neither text nor images
+                - 404 NOT FOUND: If no similar flyers are found
+                - 500 INTERNAL SERVER ERROR: If an error occurs during processing
+
+        Note:
+            - When both text and images are provided, embeddings are combined by averaging
+            - Only the first image in the images list is processed
+            - Returns up to 5 most similar flyers based on the similarity search configuration
         """
         try:
             query_embedding = None
-            if query.text and query.images:
+            if query.text and len(query.images) > 0:
                 # Combine text and image embeddings by averaging
                 text_embedding = self.embedding_models.input_text_embedding(query.text)
                 image = Image.open(query.images[0])  # Process first image
@@ -26,7 +54,7 @@ class RAG:
                 query_embedding = (text_embedding + image_embedding) / 2
             elif query.text:
                 query_embedding = self.embedding_models.input_text_embedding(query.text)
-            elif query.images:
+            elif len(query.images) > 0:
                 image = Image.open(query.images[0])  # Process first image
                 query_embedding = self.embedding_models.input_image_embedding(image)
             else:
@@ -38,7 +66,7 @@ class RAG:
             # Perform similarity search
             search_results = await self.qdrant_manager.similarity_search(
                 embedding=query_embedding.tolist(),
-                search="text",
+                search="image",
                 collection_name=collection_name
             )
 
