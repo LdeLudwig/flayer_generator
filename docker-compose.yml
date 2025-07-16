@@ -25,6 +25,8 @@ services:
   fastapi:
     build: backend
     restart: always
+    volumes:
+      - ./backend:/app
     depends_on:
       - db
     ports:
@@ -35,7 +37,6 @@ services:
     networks:
     - qdrant-network
     command: fastapi dev --host 0.0.0.0 --port 8000
-
 volumes:
   qdrant_storage:
 
