@@ -4,6 +4,7 @@ from db.vector_database import QdrantFlyerManager
 from utils.embedding import Embedding
 from db.models import Prompt
 
+
 class RAG:
     def __init__(self):
         self.qdrant_manager = QdrantFlyerManager()
@@ -32,25 +33,25 @@ class RAG:
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Prompt must contain text or at least one image."
+                    detail="Prompt must contain text or at least one image.",
                 )
 
             # Perform similarity search
             search_results = await self.qdrant_manager.similarity_search(
                 embedding=query_embedding.tolist(),
                 search="text",
-                collection_name=collection_name
+                collection_name=collection_name,
             )
 
             if not search_results:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="No similar flyers found."
+                    detail="No similar flyers found.",
                 )
-            
+
             # Format results to be decoded
             formatted_results = [
-                # return just the image vector 
+                # return just the image vector
                 {
                     # Get payload associated values
                     "id": result.id,
@@ -69,5 +70,5 @@ class RAG:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error in get_similar_flyers: {str(e)}"
+                detail=f"Error in get_similar_flyers: {str(e)}",
             )
