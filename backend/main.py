@@ -1,5 +1,6 @@
-import torch
-from fastapi import FastAPI, status, HTTPException 
+import uvicorn
+from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from db.vector_database import QdrantFlyerManager
 from db.models import Prompt
@@ -28,25 +29,27 @@ embedding = Embedding()
 rag = RAG()
 
 # Define the upload directory
-UPLOAD_DIR="./uploads"
+UPLOAD_DIR = "./uploads"
 
 
 @app.get("/")
 def read_root():
-    return {"Server is running!"}
+    return RedirectResponse(url="/docs")
+
 
 @app.get("/get_collection_info", tags=["collection"])
 async def get_collection_info(collection_name: str):
     try:
         # Get collection info
-        collection_info = await qdrant_manager.qdrant_client.get_collection(collection_name)
-        return {
-            print(collection_info)
-        }
+        collection_info = await qdrant_manager.qdrant_client.get_collection(
+            collection_name
+        )
+        print(collection_info)  # Print for debugging
+        return {"collection_info": collection_info}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in get_collection_info: {str(e)}"
+            detail=f"Error in get_collection_info: {str(e)}",
         )
 
 
@@ -59,7 +62,9 @@ async def train_embedding(collection_name: str):
         image_embeddings = embedding.get_train_image_embeddings(pair_list)
 
         # Initialize collection (await async call)
-        collection_response = await qdrant_manager.initialize_collection(collection_name)
+        collection_response = await qdrant_manager.initialize_collection(
+            collection_name
+        )
 
         if collection_response == status.HTTP_200_OK:
             # Upsert embeddings (await async call)
@@ -85,8 +90,9 @@ async def train_embedding(collection_name: str):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in train_embedding: {str(e)}"
+            detail=f"Error in train_embedding: {str(e)}",
         )
+
 
 @app.post("/get_rag_response", tags=["generate_flyer"])
 async def get_rag_response(prompt: Prompt):
@@ -103,7 +109,13 @@ async def get_rag_response(prompt: Prompt):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in get_rag_response: {str(e)}"
+            detail=f"Error in get_rag_response: {str(e)}",
         )
+
+
 # include routers to use dalle llm
 app.include_router(api_router)
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")

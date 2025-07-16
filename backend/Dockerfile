@@ -1,15 +1,18 @@
-FROM python:3.10-slim
+FROM python:3.12-slim-bookworm
 
 ENV PYTHONUNBUFFERED=1
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 RUN mkdir /app
 
 COPY requirements.txt /app/requirements.txt
 
 # install the pytorch lib for gpu processing
-RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+RUN uv pip install --system torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN uv pip install --system --no-cache -r /app/requirements.txt
 
 COPY api /app/api
 COPY db /app/db

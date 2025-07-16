@@ -2,7 +2,7 @@ import os
 import requests
 import streamlit as st
 from PIL import Image
-from db.models import Prompt
+from backend.db.models import Prompt
 
 # Backend api url
 fastapi_url = "http://localhost:8000"
@@ -11,14 +11,6 @@ fastapi_url = "http://localhost:8000"
 st.title("🎴 Flyer Generator")
 text_prompt = st.text_area("Enter text prompt")
 uploaded_file = st.file_uploader("Upload an image (optional)", type=["jpg", "jpeg", "png"])
-
-
-"""
-TODO - Implement the following features:
-- Add the choose model logic
-- Ensure the right API usage
-"""
-
 
 with st.sidebar:
     st.sidebar.header("Choose your model", divider="red")
