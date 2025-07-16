@@ -23,9 +23,7 @@ class Embedding:
 
         # Initialize OpenAI client for caption generation
         self.llm = ChatOpenAI(
-            model="gpt-4o",
-            temperature=0.7,
-            api_key=os.getenv("OPENAI_API_KEY")
+            model="gpt-4o", temperature=0.7, api_key=os.getenv("OPENAI_API_KEY")
         )
 
     def generate_caption(self, images):
@@ -55,14 +53,14 @@ class Embedding:
                     content=[
                         {
                             "type": "text",
-                            "text": "Generate a detailed, descriptive caption for this flyer image. Focus on the visual elements, text content, colors, layout, and overall design. Keep it concise but informative for image embedding purposes."
+                            "text": "Generate a detailed, descriptive caption for this flyer image. Focus on the visual elements, text content, colors, layout, and overall design. Keep it concise but informative for image embedding purposes.",
                         },
                         {
                             "type": "image_url",
                             "image_url": {
                                 "url": f"data:image/jpeg;base64,{img_base64}"
-                            }
-                        }
+                            },
+                        },
                     ]
                 )
 
